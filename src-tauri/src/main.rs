@@ -189,6 +189,7 @@ async fn close_splashscreen(window: tauri::Window) {
     window.get_window("main").unwrap().show().unwrap();
 }
 
+#[tauri::command]
 fn initialize_tables() {
     if get_database_path().is_none() {
         return;
@@ -313,8 +314,8 @@ fn main() -> std::io::Result<()> {
             tauri::Menu::default()
         })
         .setup(|app| {
-            initialize_tables();
             initialize_config();
+            initialize_tables();
 
             Ok(())
         })
@@ -330,7 +331,8 @@ fn main() -> std::io::Result<()> {
             get_selected_file_path,
             get_database_path,
             set_database_path,
-            get_database_filename
+            get_database_filename,
+            initialize_tables
         ])
         .run(context)
         .expect("error while running tauri application");

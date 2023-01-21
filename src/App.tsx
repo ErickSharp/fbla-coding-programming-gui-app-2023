@@ -25,8 +25,6 @@ const App = () => {
     }, [theme]);
 
     if (!databasePathSelected) {
-
-
         return (
             <div className='w-full h-screen flex flex-col items-center justify-center space-y-8'>
                 <div className='flex flex-col items-center space-y-2'>
@@ -40,6 +38,7 @@ const App = () => {
                     <Button onClick={async () => {
                         const filePath = await invoke("get_selected_file_path");
                         await invoke("set_database_path", { path: filePath });
+                        await invoke("initialize_tables");
 
                         refreshDatabasePathSelection();
                     }}>

@@ -1,4 +1,4 @@
-import { CarbonIconType, FlashFilled, Meter, TrophyFilled } from "@carbon/icons-react";
+import { CarbonIconType, FlashFilled, Meter, Renew, TrophyFilled } from "@carbon/icons-react";
 import { CarbonIconSize, PropsWithClassName } from "../../types/common";
 
 enum StatisticsBarItemColor {
@@ -40,38 +40,44 @@ const StatisticCard = ({ headerText, dataText, icon: Icon, color }: StatisticsBa
 
 export const StatisticsBar = ({ className }: PropsWithClassName) => {
     return (
-        <div className={`relative w-full h-40 overflow-x-hidden ${className}`}>
-            <div className="absolute inset-x-0 overflow-x-scroll flex flex-row items-center space-x-6" >
-                <StatisticCard
-                    headerText="Participation Greater than Last Quarter by"
-                    dataText="22%"
-                    icon={Meter}
-                    color={StatisticsBarItemColor.Green}
-                />
-                <StatisticCard
-                    headerText="Most Participation Achieved by"
-                    dataText="Grade 12"
-                    icon={TrophyFilled}
-                    color={StatisticsBarItemColor.Blue}
-                />
-                <StatisticCard
-                    headerText="Average Participant Achieved"
-                    dataText="13 Points"
-                    icon={TrophyFilled}
-                    color={StatisticsBarItemColor.Blue}
-                />
-                <StatisticCard
-                    headerText="Students Participated Most in"
-                    dataText="Sporting"
-                    icon={FlashFilled}
-                    color={StatisticsBarItemColor.Blue}
-                />
-                <StatisticCard
-                    headerText="District Performance"
-                    dataText="Absolutely Horrible"
-                    icon={Meter}
-                    color={StatisticsBarItemColor.Red}
-                />
+        <div className={className}>
+            <div className="flex flex-row items-center w-fit space-x-2 mb-2 group cursor-pointer text-[var(--cds-text-secondary)] hover:text-[var(--cds-button-primary)]">
+                <p>Refresh</p>
+                <Renew className="group-hover:rotate-180 transition duration-200" />
+            </div>
+            <div className={`relative w-full h-40 overflow-x-hidden`}>
+                <div className="absolute inset-x-0 overflow-x-scroll flex flex-row items-center space-x-6" >
+                    <StatisticCard
+                        headerText="Participation Greater than Last Quarter by"
+                        dataText="22%"
+                        icon={Meter}
+                        color={StatisticsBarItemColor.Green}
+                    />
+                    <StatisticCard
+                        headerText="Most Participation Achieved by"
+                        dataText="Grade 12"
+                        icon={TrophyFilled}
+                        color={StatisticsBarItemColor.Blue}
+                    />
+                    <StatisticCard
+                        headerText="Average Participant Achieved"
+                        dataText="13 Points"
+                        icon={TrophyFilled}
+                        color={StatisticsBarItemColor.Blue}
+                    />
+                    <StatisticCard
+                        headerText="Students Participated Most in"
+                        dataText="Sporting"
+                        icon={FlashFilled}
+                        color={StatisticsBarItemColor.Blue}
+                    />
+                    <StatisticCard
+                        headerText="District Performance"
+                        dataText="Absolutely Horrible"
+                        icon={Meter}
+                        color={StatisticsBarItemColor.Red}
+                    />
+                </div>
             </div>
         </div>
     );
