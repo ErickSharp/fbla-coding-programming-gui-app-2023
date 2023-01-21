@@ -17,11 +17,11 @@ export const Dashboard = () => {
             <div className="flex flex-row justify-between flex-wrap">
                 <div className="flex flex-row items-center space-x-4">
                     <h1 className="font-semibold">{databaseFilename}</h1>
-                    <p className="text-blue-500 hover:text-blue-800 text-xl transition duration-150 underline cursor-pointer" tabIndex={0}>Change</p>
+                    {/* <p className="text-blue-500 hover:text-blue-800 text-xl transition duration-150 underline cursor-pointer" tabIndex={0}>Change</p> */}
                 </div>
                 <div className="flex flex-row items-center space-x-5">
                     <Button>Award Menu</Button>
-                    <Button>Generate Quarter Report</Button>
+                    {/* <Button>Generate Quarter Report</Button> */}
                 </div>
             </div>
 

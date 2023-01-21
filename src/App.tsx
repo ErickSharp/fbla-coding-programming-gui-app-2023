@@ -47,7 +47,8 @@ const App = () => {
                     onRequestClose={() => setCreateFileModalOpen(false)}
                     primaryButtonDisabled={!databaseFilenameValid || folderLocation === null}
                     onRequestSubmit={async () => {
-                        const filePath = path.join(folderLocation as string, databaseFilename)
+                        const filePath = await path.join(folderLocation as string, `${databaseFilename}.db`);
+                        console.log(filePath);
                         await invoke("create_database_file", { path: filePath });
                         await invoke("set_database_path", { path: filePath });
                         await invoke("initialize_tables");

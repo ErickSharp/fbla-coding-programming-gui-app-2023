@@ -1,5 +1,7 @@
 import { CarbonIconType, FlashFilled, Meter, Renew, TrophyFilled } from "@carbon/icons-react";
 import { CarbonIconSize, PropsWithClassName } from "../../types/common";
+import { useCallback, useState } from "react";
+import { ParticipationEventKind } from "../../schema";
 
 enum StatisticsBarItemColor {
     Blue,
@@ -9,7 +11,7 @@ enum StatisticsBarItemColor {
 
 interface StatisticsBarItemProps {
     headerText: string;
-    dataText: string;
+    dataText: string | undefined;
     icon: CarbonIconType;
     color: StatisticsBarItemColor;
 }
@@ -32,50 +34,57 @@ const StatisticCard = ({ headerText, dataText, icon: Icon, color }: StatisticsBa
             </div>
             <div className="self-center">
                 <h3 className="text-base whitespace-nowrap text-[var(--cds-text-secondary)]">{headerText}</h3>
-                <h1 className="font-bold whitespace-nowrap text-[var(--cds-text-primary)]">{dataText}</h1>
+                <h1 className="font-bold whitespace-nowrap text-[var(--cds-text-primary)]">{dataText ?? "Loading"}</h1>
             </div>
         </div>
     )
 }
 
+type StatisticsBarData = {
+    mostParticipationGrade: number,
+    averageParticipationPoints: number,
+    mostPopularEventType: ParticipationEventKind
+}
+
 export const StatisticsBar = ({ className }: PropsWithClassName) => {
+    const [data, setData] = useState<Partial<StatisticsBarData>>({
+        mostParticipationGrade: undefined,
+        averageParticipationPoints: undefined,
+        mostPopularEventType: undefined
+    });
+
+    const refreshData = useCallback(() => {
+
+    }, []);
+
     return (
         <div className={className}>
-            <div className="flex flex-row items-center w-fit space-x-2 mb-2 group cursor-pointer text-[var(--cds-text-secondary)] hover:text-[var(--cds-button-primary)]">
+            <div
+                className="flex flex-row items-center w-fit space-x-2 mb-2 group cursor-pointer text-[var(--cds-text-secondary)] hover:text-[var(--cds-button-primary)]"
+                onClick={refreshData}
+            >
                 <p>Refresh</p>
                 <Renew className="group-hover:rotate-180 transition duration-200" />
             </div>
             <div className={`relative w-full h-40 overflow-x-hidden`}>
                 <div className="absolute inset-x-0 overflow-x-scroll flex flex-row items-center space-x-6" >
                     <StatisticCard
-                        headerText="Participation Greater than Last Quarter by"
-                        dataText="22%"
-                        icon={Meter}
-                        color={StatisticsBarItemColor.Green}
-                    />
-                    <StatisticCard
                         headerText="Most Participation Achieved by"
-                        dataText="Grade 12"
+                        dataText={data.mostParticipationGrade !== undefined ? `Grade ${data.mostParticipationGrade}` : undefined}
                         icon={TrophyFilled}
                         color={StatisticsBarItemColor.Blue}
                     />
                     <StatisticCard
                         headerText="Average Participant Achieved"
-                        dataText="13 Points"
+                        dataText={data.averageParticipationPoints !== undefined ? `${data.averageParticipationPoints} Points` : undefined}
                         icon={TrophyFilled}
                         color={StatisticsBarItemColor.Blue}
                     />
                     <StatisticCard
                         headerText="Students Participated Most in"
-                        dataText="Sporting"
+                        dataText={data.mostPopularEventType !== undefined ? `Sporting` : undefined}
                         icon={FlashFilled}
                         color={StatisticsBarItemColor.Blue}
-                    />
-                    <StatisticCard
-                        headerText="District Performance"
-                        dataText="Absolutely Horrible"
-                        icon={Meter}
-                        color={StatisticsBarItemColor.Red}
                     />
                 </div>
             </div>
