@@ -234,6 +234,13 @@ fn backup_database(destination: String) -> () {
 }
 
 #[tauri::command]
+fn create_database_file(path: String) {
+    dbg!(&path);
+    fs::write(path, "");
+    dbg!("Hello");
+}
+
+#[tauri::command]
 fn get_selected_folder_path() -> Result<String, ()> {
     let folder = FileDialog::new()
         .set_directory("/")
@@ -332,7 +339,8 @@ fn main() -> std::io::Result<()> {
             get_database_path,
             set_database_path,
             get_database_filename,
-            initialize_tables
+            initialize_tables,
+            create_database_file
         ])
         .run(context)
         .expect("error while running tauri application");
