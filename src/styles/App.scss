@@ -1,0 +1,44 @@
+// NOTE: It is EXTREMELY important that all CSS imports and declarations are made after including tailwindcss styles as tailwind overrides base styling
+@use 'tailwind.scss';
+@use '@carbon/react';
+@use 'ibm-plex.scss';
+@use 'scrollbar.scss';
+
+@layer base {
+    body {
+        background: react.$background;
+        color: react.$text-primary;
+        margin: 0;
+        font-family: "IBM Plex Sans", -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+            'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+            sans-serif;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+    }
+
+    code {
+        font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
+            monospace;
+    }
+}
+
+
+:root {
+    @include react.theme(react.$g10);
+}
+
+[data-carbon-theme='g100'] {
+    @include react.theme(react.$g100);
+}
+
+div.cds--date-picker {
+    width: 100%;
+}
+
+div.cds--date-picker-container {
+    width: 100%;
+}
+
+input.cds--date-picker__input {
+    width: 100% !important;
+}

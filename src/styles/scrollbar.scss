@@ -1,0 +1,15 @@
+::-webkit-scrollbar {
+    width: 15px;
+}
+
+::-webkit-scrollbar-track {
+    background: var(--cds-layer);
+}
+
+::-webkit-scrollbar-thumb {
+    background-color: var(--cds-layer-hover);
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background-color: var(--cds-layer-accent);
+}
