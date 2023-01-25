@@ -1,4 +1,5 @@
 import { DocumentImport, Help, Rule } from "@carbon/icons-react";
+import { invoke } from "@tauri-apps/api";
 import { PropsWithChildren } from "react";
 import { CarbonIconSize } from "../types/common";
 
@@ -21,14 +22,11 @@ export const Sidebar = () => {
 
     return (
         <div className="bg-[var(--cds-layer)] p-3 space-y-3">
-            <SidebarItem toolbarText="Load">
-                <DocumentImport size={SIDEBAR_ITEM_ICON_SIZE} />
-            </SidebarItem>
-            <SidebarItem toolbarText="Backup">
+            <SidebarItem toolbarText="Backup" onClick={async () => {
+                const currentPath = await invoke("get_database_path") as string;
+                invoke("backup_database", { destination: currentPath.replace(".db", "-backup.db") });
+            }}>
                 <Rule size={SIDEBAR_ITEM_ICON_SIZE} />
-            </SidebarItem>
-            <SidebarItem toolbarText="Help">
-                <Help size={SIDEBAR_ITEM_ICON_SIZE} />
             </SidebarItem>
         </div>
     );

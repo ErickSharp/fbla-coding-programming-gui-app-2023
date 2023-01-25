@@ -314,6 +314,8 @@ fn set_database_path(path: String) {
 
 fn main() -> std::io::Result<()> {
     let context = tauri::generate_context!();
+
+    initialize_config();
     tauri::Builder::default()
         .menu(if cfg!(target_os = "macos") {
             tauri::Menu::os_default(&context.package_info().name)
@@ -321,7 +323,6 @@ fn main() -> std::io::Result<()> {
             tauri::Menu::default()
         })
         .setup(|app| {
-            initialize_config();
             initialize_tables();
 
             Ok(())

@@ -1,4 +1,4 @@
-import { Edit, TrashCan } from "@carbon/icons-react";
+import { Edit, TrashCan, TrophyFilled } from "@carbon/icons-react";
 import {
     Modal,
     Button,
@@ -37,7 +37,9 @@ export const StudentStatisticsTable = ({ className }: PropsWithClassName) => {
     const [studentData, setStudentData] = useState<TableStudent[]>([]);
     const [modalOpen, setModalOpen] = useState(false);
     const [addStudentModalOpen, setAddStudentModalOpen] = useState(false);
+    const [winnerOpen, setWinnerOpen] = useState(false);
 
+    const [winner, setWinner] = useState<string | undefined>(undefined);
     const getStudentData = async (): Promise<TableStudent[]> => {
         const { students } = await (invoke("get_students") as Promise<{ students: Student[] }>);
         const studentPointMap: Record<Student["id"], TableStudent["participationPoints"]> = {};
@@ -150,8 +152,15 @@ export const StudentStatisticsTable = ({ className }: PropsWithClassName) => {
                                             kind="primary">
                                             Add new
                                         </Button>
+                                        <Button renderIcon={TrophyFilled} onClick={() => setWinner(studentData[parseInt(Math.random() * studentData.length - 1)].name)}>
+                                            Appoint Random Winner
+                                        </Button>
+                                        <Button renderIcon={TrophyFilled} onClick={() => setWinnerOpen(true)}>
+                                            Show Winner!
+                                        </Button>
                                     </TableToolbarContent>
                                 </TableToolbar>
+                                <Modal open={winnerOpen} onRequestClose={() => setWinnerOpen(false)} onRequestSubmit={() => setWinnerOpen(false)} primaryButtonText="Okay" secondaryButtonText="Close" modalHeading={winner === undefined ? "No winner yet!" : `${winner} is our winner!`}></Modal>
                                 <Table {...getTableProps()}>
                                     <TableHead>
                                         <TableRow>
@@ -189,9 +198,10 @@ export const StudentStatisticsTable = ({ className }: PropsWithClassName) => {
                                                     })}
                                                     <TableCell style={{ padding: '0', width: '0' }}>
                                                         <div className="flex flex-row items-center justify-end">
-                                                            <Button renderIcon={Edit} onClick={() => { }} disabled>
-                                                                Edit
+                                                            <Button renderIcon={TrophyFilled} onClick={() => setWinner(row.cells[0].value)}>
+                                                                Appoint Winner
                                                             </Button>
+
                                                         </div>
                                                     </TableCell>
                                                 </>

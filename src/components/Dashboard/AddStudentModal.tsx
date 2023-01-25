@@ -3,6 +3,7 @@ import { Button, DatePicker, DatePickerInput, Modal, NumberInput, Select, Select
 import { useCallback, useEffect, useState } from "react";
 import { ParticipationEvent, ParticipationEventKind } from "../../schema";
 import { AddFilled } from "@carbon/icons-react";
+import { ALL_PARTICIPATION_EVENTS } from './ParticipationEvents';
 
 interface AddStudentModalProps {
     visibilityState: [boolean, (visibility: boolean) => void];
@@ -12,7 +13,7 @@ interface AddStudentModalProps {
 export const AddStudentModal = ({ visibilityState: [open, setOpen], onSubmit }: AddStudentModalProps) => {
     const [studentName, setStudentName] = useState("");
     const [gradeLevel, setGradeLevel] = useState(10);
-    const [participationEvents, setParticipationEvents] = useState<(Partial<ParticipationEvent> & { id: number })[]>([]);
+    const [participationEvents, setParticipationEvents] = useState<(Partial<ParticipationEvent> & { id: number, method: 'preset' | 'custom' })[]>([]);
 
     const editParticipationEvent = useCallback(<T extends keyof ParticipationEvent,>(id: number, key: T, value: ParticipationEvent[T]) => {
         setParticipationEvents(old => {
@@ -95,7 +96,7 @@ export const AddStudentModal = ({ visibilityState: [open, setOpen], onSubmit }: 
                 <p>Participation Events</p>
 
                 <div className="flex flex-col space-y-8 divide-y-2  divide-blue-500">
-                    {participationEvents.map(participationEvent => {
+                    {participationEvents.filter(participationEvent => participationEvent.method === 'custom').map(participationEvent => {
                         return (
                             <div className="space-y-4">
                                 <TextInput
@@ -153,17 +154,64 @@ export const AddStudentModal = ({ visibilityState: [open, setOpen], onSubmit }: 
                             </div>
                         )
                     })}
+                    {participationEvents.filter(participationEvent => participationEvent.method === 'preset').map(participationEvent => {
+                        return (
+                            <div>
+                                <Select
+                                    id="preset-participation-event-selector"
+                                    defaultValue="placeholder"
+                                    labelText="Event Type"
+                                    onChange={(e) => {
+                                        const event = ALL_PARTICIPATION_EVENTS[e.target.value as number];
+                                        editParticipationEvent(participationEvent.id, "name", event.name);
+                                        editParticipationEvent(participationEvent.id, "kind", event.kind);
+                                        editParticipationEvent(participationEvent.id, "date", event.date);
+                                        editParticipationEvent(participationEvent.id, "points", 10);
+                                    }}
+                                >
+                                    <SelectItem disabled hidden value="placeholder" text="Choose an Event Type" />
+                                    {
+                                        ALL_PARTICIPATION_EVENTS.map((event, index) => {
+                                            return (
+                                                <SelectItem value={index} text={event.name} />
+                                            );
+                                        })
+                                    }
+                                </Select>
+                                <Button
+                                    kind="danger"
+                                    className="mt-4"
+                                    onClick={() => setParticipationEvents(old => old.filter(element => element.id !== participationEvent.id))}
+                                >
+                                    Delete Event
+                                </Button>
+                            </div>
+                        )
+                    })}
                 </div>
-                <button
-                    type="button"
-                    className="flex flex-row items-center justify-center p-4 space-x-4 w-full bg-transparent hover:bg-[var(--cds-background)] transition duration-150"
-                    onClick={() => {
-                        setParticipationEvents(old => [...old, { id: participationEvents.length + 1 }]);
-                    }}
-                >
-                    <AddFilled size={32} />
-                    <p className="!pr-0">Add New Event</p>
-                </button>
+                <div className="flex flex-row space-x-4">
+                    <button
+                        type="button"
+                        className="flex flex-row items-center justify-center p-4 space-x-4 w-full bg-transparent hover:bg-[var(--cds-background)] transition duration-150"
+                        onClick={() => {
+                            setParticipationEvents(old => [...old, { id: participationEvents.length + 1, method: 'custom' }]);
+                        }}
+                    >
+                        <AddFilled size={32} />
+                        <p className="!pr-0">Add New Custom Event</p>
+                    </button>
+                    <button
+                        type="button"
+                        className="flex flex-row items-center justify-center p-4 space-x-4 w-full bg-transparent hover:bg-[var(--cds-background)] transition duration-150"
+                        onClick={() => {
+                            setParticipationEvents(old => [...old, { id: participationEvents.length + 1, method: 'preset' }]);
+                        }}
+                    >
+                        <AddFilled size={32} />
+                        <p className="!pr-0">Add New Pre-Set Event</p>
+                    </button>
+                </div>
+
             </div>
         </Modal>
     )

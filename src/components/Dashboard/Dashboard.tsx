@@ -20,12 +20,12 @@ export const Dashboard = () => {
                     {/* <p className="text-blue-500 hover:text-blue-800 text-xl transition duration-150 underline cursor-pointer" tabIndex={0}>Change</p> */}
                 </div>
                 <div className="flex flex-row items-center space-x-5">
-                    <Button>Award Menu</Button>
+                    {/* <Button>Award Menu</Button> */}
                     {/* <Button>Generate Quarter Report</Button> */}
                 </div>
             </div>
 
-            <StatisticsBar className="mt-5" />
+            {/* <StatisticsBar className="mt-5" /> */}
             <StudentStatisticsTable className="mt-16" />
         </div>
     );
