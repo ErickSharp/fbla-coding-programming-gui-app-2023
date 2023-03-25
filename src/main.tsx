@@ -6,7 +6,5 @@ import { invoke } from '@tauri-apps/api'
 invoke("close_splashscreen");
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
-    <React.StrictMode>
-        <App />
-    </React.StrictMode>
+    <App />
 )

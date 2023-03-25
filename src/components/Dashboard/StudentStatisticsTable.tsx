@@ -21,6 +21,7 @@ import {
 
 import { PropsWithClassName } from "../../types/common";
 import { invoke } from "@tauri-apps/api";
+import { listen } from "@tauri-apps/api/event"
 import { Student } from "../../schema";
 import { useCallback, useEffect, useState } from "react";
 import { AddStudentModal } from "./AddStudentModal";
@@ -70,8 +71,9 @@ export const StudentStatisticsTable = ({ className }: PropsWithClassName) => {
     }, [setStudentData]);
 
     useEffect(() => {
-        getStudentData().then(students => {
-            setStudentData(students);
+        updateStudents();
+        listen("update-student-data", () => {
+            updateStudents();
         });
     }, []);
 
@@ -148,16 +150,22 @@ export const StudentStatisticsTable = ({ className }: PropsWithClassName) => {
                                         <Button
                                             tabIndex={batchActionProps.shouldShowBatchActions ? -1 : 0}
                                             onClick={() => setAddStudentModalOpen(true)}
-                                            size="small"
+                                            size="sm"
                                             kind="primary">
                                             Add new
                                         </Button>
-                                        <Button renderIcon={TrophyFilled} onClick={() => setWinner(studentData[parseInt(Math.random() * studentData.length - 1)].name)}>
-                                            Appoint Random Winner
-                                        </Button>
-                                        <Button renderIcon={TrophyFilled} onClick={() => setWinnerOpen(true)}>
-                                            Show Winner!
-                                        </Button>
+                                        {studentData.length !== 0 && (
+                                            <>
+                                                <Button renderIcon={TrophyFilled} onClick={() => setWinner(studentData[Math.floor(Math.random() * studentData.length)].name)}>
+                                                    Appoint Random Winner
+                                                </Button>
+                                                {winner !== undefined && (
+                                                    <Button renderIcon={TrophyFilled} onClick={() => setWinnerOpen(true)}>
+                                                        Show Winner!
+                                                    </Button>
+                                                )}
+                                            </>
+                                        )}
                                     </TableToolbarContent>
                                 </TableToolbar>
                                 <Modal open={winnerOpen} onRequestClose={() => setWinnerOpen(false)} onRequestSubmit={() => setWinnerOpen(false)} primaryButtonText="Okay" secondaryButtonText="Close" modalHeading={winner === undefined ? "No winner yet!" : `${winner} is our winner!`}></Modal>
@@ -199,7 +207,7 @@ export const StudentStatisticsTable = ({ className }: PropsWithClassName) => {
                                                     <TableCell style={{ padding: '0', width: '0' }}>
                                                         <div className="flex flex-row items-center justify-end">
                                                             <Button renderIcon={TrophyFilled} onClick={() => setWinner(row.cells[0].value)}>
-                                                                Appoint Winner
+                                                                Appoint as Winner
                                                             </Button>
 
                                                         </div>

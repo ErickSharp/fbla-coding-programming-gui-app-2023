@@ -3,7 +3,7 @@
     windows_subsystem = "windows"
 )]
 
-use std::{fs, path::Path, time::Duration};
+use std::{fs, path::Path, time::Duration, io::Write};
 
 use rfd::FileDialog;
 use rusqlite::{backup, params, Connection};
@@ -72,12 +72,13 @@ fn get_students() -> StudentResponse {
     let mut student_statement = connection.prepare("SELECT * FROM Students").unwrap();
     let students = student_statement
         .query_map([], |row| {
-            let student_id: u32 = dbg!(row.get(0)?);
+            let student_id: u32 = row.get(0)?;
 
             let mut participation_events_statement = connection
                 .prepare("SELECT * FROM ParticipationEvents WHERE StudentId = (?1)")
                 .unwrap();
 
+            // Query for participation events, unwrap data, and bundle it into 'ParticipationEvent' structs
             let participation_events: Vec<ParticipationEvent> = participation_events_statement
                 .query_map(params![student_id], |row| {
                     let participation_event_kind_number: u32 = row.get(5)?;
@@ -92,9 +93,8 @@ fn get_students() -> StudentResponse {
                 })
                 .unwrap()
                 .filter_map(|res| {
-                    dbg!(&res);
                     if let Ok(participation_event) = res {
-                        Some(dbg!(participation_event))
+                        Some(participation_event)
                     } else {
                         None
                     }
@@ -123,9 +123,13 @@ fn get_students() -> StudentResponse {
 #[tauri::command]
 fn get_student_participation_points(student_id: u32) -> u32 {
     let connection = Connection::open(get_database_path().unwrap()).unwrap();
+
+    // Query to retrieve the points of a student with the given studentID
     let mut point_retrieval_statement = connection
         .prepare("SELECT Points from ParticipationEvents WHERE StudentID = (?1)")
         .unwrap();
+
+    // Carry out the query and perform necessary unwrapping to get participation points
     point_retrieval_statement
         .query_map(params![student_id], |row| {
             let value: u32 = row.get(0)?;
@@ -197,6 +201,7 @@ fn initialize_tables() {
 
     let connection = Connection::open(get_database_path().unwrap()).unwrap();
 
+    // Set up table that holds student data
     connection.execute(
         "CREATE TABLE IF NOT EXISTS Students (
         Id INTEGER PRIMARY KEY,
@@ -206,6 +211,7 @@ fn initialize_tables() {
         params![],
     );
 
+    // Set up table that holds participation events
     connection.execute(
         "CREATE TABLE IF NOT EXISTS ParticipationEvents (
             StudentId INTEGER NOT NULL,
@@ -219,9 +225,8 @@ fn initialize_tables() {
     );
 }
 
-// TODO: Make this return Result<()>
 #[tauri::command]
-fn backup_database(destination: String) -> () {
+fn backup_database(destination: String) {
     let src = Connection::open(get_database_path().unwrap()).unwrap();
 
     let mut backup_connection = Connection::open(Path::new(&destination)).unwrap();
@@ -229,15 +234,11 @@ fn backup_database(destination: String) -> () {
     backup
         .run_to_completion(5, Duration::from_millis(250), None)
         .unwrap();
-
-    ()
 }
 
 #[tauri::command]
 fn create_database_file(path: String) {
-    dbg!(&path);
     fs::write(path, "");
-    dbg!("Hello");
 }
 
 #[tauri::command]
@@ -312,6 +313,38 @@ fn set_database_path(path: String) {
     fs::write(CONFIG_PATH, serde_json::to_string(&config).unwrap());
 }
 
+#[tauri::command]
+fn dump_import_from_csv(path: String) {
+    let csv_file = fs::read_to_string(path).unwrap();
+
+    let mut reader = csv::Reader::from_reader(csv_file.as_bytes());
+
+    for record in reader.records() {
+        let record = record.unwrap();
+
+        // FORMAT MUST BE name, grade_level
+        let name = &record[0];
+        let grade_level = &record[1];
+
+        add_student(name.into(), grade_level.parse::<u32>().unwrap(), vec![]);
+    }
+}
+
+#[tauri::command]
+fn export_student_roster_as_csv(destination: String) {
+    let mut roster_output_file = fs::File::create(destination).unwrap();
+
+    let StudentResponse { students } = get_students();
+
+    // Write header...
+    roster_output_file.write_all(b"Student Name,Grade Level");
+
+    // ...then write each line of CSV data for each student
+    students.iter().for_each(|student| {
+        roster_output_file.write_all(format!("{}, {}\n", student.name, student.grade_level).as_bytes());
+    });
+}
+
 fn main() -> std::io::Result<()> {
     let context = tauri::generate_context!();
 
@@ -328,6 +361,7 @@ fn main() -> std::io::Result<()> {
             Ok(())
         })
         .invoke_handler(tauri::generate_handler![
+            // These functions bridge between the backend and frontend to encapsulate functionality
             add_participation_event,
             get_students,
             add_student,
@@ -341,18 +375,12 @@ fn main() -> std::io::Result<()> {
             set_database_path,
             get_database_filename,
             initialize_tables,
-            create_database_file
+            create_database_file,
+            dump_import_from_csv,
+            export_student_roster_as_csv
         ])
         .run(context)
         .expect("error while running tauri application");
 
     Ok(())
-}
-
-#[cfg(test)]
-mod tests {
-    #[test]
-    fn it_works() {
-        assert!(true);
-    }
 }

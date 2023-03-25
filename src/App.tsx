@@ -6,14 +6,33 @@ import { GlobalTheme } from '@carbon/react';
 import { useCallback, useEffect, useState } from 'react';
 import { fs, invoke, path } from '@tauri-apps/api';
 import { Button, Modal, TextInput } from 'carbon-components-react';
+import { listen } from '@tauri-apps/api/event';
+import { HelpPage } from './components/HelpPage';
+
+// Appropriate naming
+enum AppTheme {
+    Light = "g10",
+    Dark = "g100"
+}
 
 const App = () => {
-    const [theme, setTheme] = useState("g100");
+    const [theme, setTheme] = useState("g10");
     const [databasePathSelected, setDatabasePathSelected] = useState(false);
     const [createFileModalOpen, setCreateFileModalOpen] = useState(false);
     const [databaseFilename, setDatabaseFilename] = useState('');
     const [databaseFilenameValid, setDatabaseFilenameValid] = useState(false);
     const [folderLocation, setFolderLocation] = useState<null | string>(null);
+    const [helpMenuShown, setHelpMenuShown] = useState(false);
+
+    useEffect(() => {
+        listen("toggle-help-menu", () => {
+            setHelpMenuShown(old => !old);
+        });
+
+        listen("toggle-app-theme", () => {
+            setTheme((old) => old === AppTheme.Light ? AppTheme.Dark : AppTheme.Light);
+        });
+    }, [])
 
     const refreshDatabasePathSelection = useCallback(async () => {
         const path = await invoke("get_database_path");
@@ -36,6 +55,7 @@ const App = () => {
         setDatabaseFilenameValid(verifyFilename(databaseFilename));
     }, [databaseFilename])
 
+    // If-then statement
     if (!databasePathSelected) {
         return (
             <div className='w-full h-screen flex flex-col items-center justify-center space-y-8'>
@@ -111,7 +131,12 @@ const App = () => {
         <div className="w-full h-screen flex flex-row overflow-x-hidden">
             <GlobalTheme theme={theme}>
                 <Sidebar />
-                <Dashboard />
+
+                {helpMenuShown ? (
+                    <HelpPage/>
+                ) : (
+                    <Dashboard />
+                )}
             </GlobalTheme>
         </div>
     )

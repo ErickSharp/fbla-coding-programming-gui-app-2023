@@ -1,7 +1,8 @@
 import { CarbonIconType, FlashFilled, Meter, Renew, TrophyFilled } from "@carbon/icons-react";
 import { CarbonIconSize, PropsWithClassName } from "../../types/common";
-import { useCallback, useState } from "react";
-import { ParticipationEventKind } from "../../schema";
+import { useCallback, useEffect, useState } from "react";
+import { ParticipationEventKind, Student } from "../../schema";
+import { invoke } from "@tauri-apps/api";
 
 enum StatisticsBarItemColor {
     Blue,
@@ -34,7 +35,7 @@ const StatisticCard = ({ headerText, dataText, icon: Icon, color }: StatisticsBa
             </div>
             <div className="self-center">
                 <h3 className="text-base whitespace-nowrap text-[var(--cds-text-secondary)]">{headerText}</h3>
-                <h1 className="font-bold whitespace-nowrap text-[var(--cds-text-primary)]">{dataText ?? "Loading"}</h1>
+                <h1 className="font-bold whitespace-nowrap text-[var(--cds-text-primary)]">{dataText ?? "N/A"}</h1>
             </div>
         </div>
     )
@@ -53,9 +54,90 @@ export const StatisticsBar = ({ className }: PropsWithClassName) => {
         mostPopularEventType: undefined
     });
 
-    const refreshData = useCallback(() => {
+    const refreshData = useCallback(async () => {
+        const { students } = await (invoke("get_students") as Promise<{ students: Student[] }>);
+        const sum = (arr: number[]): number => arr.reduce((prev, curr) => prev + curr, 0);
 
+        if (students.length === 0) return;
+
+        // Calculate all attained student points and divide by the number of students
+        const averageParticipationPoints = sum(
+            students.map((student) => sum(
+                student.participationEvents.map(participationEvent => participationEvent.points)
+            ))
+        ) / students.length;
+
+        const mostParticipationGrade = (() => {
+            if (averageParticipationPoints === 0) {
+                return undefined;
+            }
+
+            type GradeLevel = number;
+            let gradeOccurrences: Record<GradeLevel, number> = {};
+
+            students.forEach((student) => {
+                const { gradeLevel } = student;
+
+                gradeOccurrences[gradeLevel] = (gradeOccurrences[gradeLevel] ?? 0) + student.participationEvents.length;
+            });
+
+            let mostOccurrentGrade = parseInt(Object.keys(gradeOccurrences)[0]);
+
+            for (const grade in gradeOccurrences) {
+                const numberInGrade = gradeOccurrences[grade];
+
+                if (numberInGrade > gradeOccurrences[mostOccurrentGrade]) {
+                    mostOccurrentGrade = parseInt(grade);
+                }
+            }
+
+            return mostOccurrentGrade;
+        })();
+
+        const mostPopularEventType = (() => {
+            let eventTypeOccurrences: Record<keyof typeof ParticipationEventKind, number> = {
+                [ParticipationEventKind.Sporting]: 0,
+                [ParticipationEventKind.NonSporting]: 0
+            };
+
+            students.forEach((student) => student.participationEvents.forEach((participationEvent) => {
+                const { kind } = participationEvent;
+
+                eventTypeOccurrences[kind] = eventTypeOccurrences[kind] + 1;
+            }));
+
+            const sportingOccurrences = eventTypeOccurrences[ParticipationEventKind.Sporting]; 
+            const nonSportingOccurrences = eventTypeOccurrences[ParticipationEventKind.NonSporting];
+            
+            if (sportingOccurrences === 0 && nonSportingOccurrences === 0) {
+                return undefined;
+            }
+
+            return sportingOccurrences > nonSportingOccurrences ? ParticipationEventKind.Sporting : ParticipationEventKind.NonSporting;
+        })();
+
+        setData({
+            mostParticipationGrade,
+            averageParticipationPoints,
+            mostPopularEventType
+        });
     }, []);
+
+    const eventTypeToString = (eventType: ParticipationEventKind): string => {
+        switch(eventType) {
+            case ParticipationEventKind.Sporting:
+                return "Sporting";
+            case ParticipationEventKind.NonSporting:
+                return "Non-Sporting";
+            default:
+                console.error(`Invalid eventType provided ${eventType}`);
+                return "";
+        }
+    }
+
+    useEffect(() => {
+        refreshData();
+    });
 
     return (
         <div className={className}>
@@ -76,13 +158,13 @@ export const StatisticsBar = ({ className }: PropsWithClassName) => {
                     />
                     <StatisticCard
                         headerText="Average Participant Achieved"
-                        dataText={data.averageParticipationPoints !== undefined ? `${data.averageParticipationPoints} Points` : undefined}
+                        dataText={data.averageParticipationPoints !== undefined ? `${data.averageParticipationPoints.toFixed(2)} Points` : undefined}
                         icon={TrophyFilled}
                         color={StatisticsBarItemColor.Blue}
                     />
                     <StatisticCard
                         headerText="Students Participated Most in"
-                        dataText={data.mostPopularEventType !== undefined ? `Sporting` : undefined}
+                        dataText={data.mostPopularEventType !== undefined ? eventTypeToString(data.mostPopularEventType) : undefined}
                         icon={FlashFilled}
                         color={StatisticsBarItemColor.Blue}
                     />

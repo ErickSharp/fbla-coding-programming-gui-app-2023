@@ -1,55 +1,49 @@
-# React-tauri-vite-template
+## Introduction
 
-Simple template to get started with react vite and tauri, note that it has typescript support also, ~~It enables the vite-plugin-tauri, to avoid ghost terminal issue~~.
+SNHS Legacy is a smart, modern, and lightweight student participation tracking software designed with the intent to empower *all* educators.
 
-## why ?
+SNHS Legacy was born from the desire to alleviate the burden on educators by lowering the barrier of technological literacy through the creation of an intuitive, yet powerful interface.
 
-Because it's fun.
+SNHS Legacy emplores the following technologies:
 
-## Requirements:
+### Frontend
+* TailwindCSS
+* TypeScript
+* React
+* Tauri
+* IBM Carbon Design System
 
-[here](https://tauri.app/v1/guides/getting-started/prerequisites)
+### Backend
+* Rust
+* SQLite
+* Tauri
 
 ## Instructions
 
-1- install dependencies
+1 - Install dependencies
+
+Run:
 
 ```sh
-#npm
 npm install
-
-#yarn
-yarn
 ```
 
-2- Run the App in development mode:
+2 - Run the App in development mode:
+
+Run:
 
 ```sh
-#npm
 npm run tauri:dev
-
-#yarn
-yarn tauri:dev
 ```
 
-note that the first run will take time as tauri download and compile dependencies.
+`NOTE:` Installing dependencies (Step 1) or running the app in development mode (Step 2) for the first time will *likely* take a longer time than usual.
 
 ## Production
 
-when you are happy with the results and ready to ship your useless app.
+When ready to create a build on any supported platform:
 
-run:
+Run:
 
 ```sh
-#npm
 npm run tauri:build
-
-#yarn
-yarn tauri:build
 ```
-
-## Note:
-
-tested on:
-
-- windows 10
